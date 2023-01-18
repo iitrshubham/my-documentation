@@ -1,87 +1,52 @@
-class basic_1:
-    """
-    This class containing the grade 1 mathematical operations: Addition and substract.
+import time
+start = time.time()
 
-    :param num1: First number
-    :type num1: float, int
-    :param num2: Second number
-    :type num2: float
+from dolfin import *
+import numpy as np
+import json
+import matplotlib.pyplot as plt
+import scipy as sp
 
-    """
-    def __init__(self,num1,num2):
-        """
-        Class constructure
-        """
-        self.num1 = num1
-        self.num2 = num2
-    def add(self):
-        """
-        This function returns the sum of two numbers.
+import dolfin as df
+# -------------------------------------------------------------------
+# MPI functions -----------------------------------------------------
+# -------------------------------------------------------------------
+comm = MPI.comm_world
+rank = MPI.rank(comm)
 
-        :return: sum of num1 and num2
-        :rtype: float
-        """        
-        return self.num1+self.num2
 
-    def subtract(self):
-        """
-        This function returns the subtraction of one number from another.
+def mprint(*argv):
+    if rank == 0:
+        out = ""
+        for arg in argv:
+            out = out + str(arg)
+        # this forces program to output when run in parallel
+        print(out, flush=True)
 
-        :returns: subtraction of num2 from num1
-        :rtype: float
-        """
-        return self.num1-self.num2
+
+# In[3]:
+
+
+
+# -------------------------------------------------------------------
+# Set some common FEniCS flags --------------------------------------
+# -------------------------------------------------------------------
+set_log_level(50)
+parameters["form_compiler"]["optimize"] = True
+parameters["form_compiler"]["cpp_optimize"] = True
+
+mesh = Mesh()
+with XDMFFile("mesh/tetra.xdmf") as infile:
+    infile.read(mesh)
+
+# Function space, trial and test functions
+elem_P = VectorElement('Lagrange', mesh.ufl_cell(), 2)
+elem_R = VectorElement('Real', mesh.ufl_cell(), 0)
+elem = MixedElement([elem_P, elem_R, elem_R, elem_R, elem_R, elem_R, elem_R, elem_R, elem_R, elem_R, elem_R, elem_R, elem_R, elem_R, elem_R, elem_R, elem_R])
+V = FunctionSpace(mesh, elem)
+
+u_, U_1, C_1, U_2, C_2, U_3, C_3, U_4, C_4, U_5, C_5, U_6, C_6, U_7, C_7, U_8, C_8 = TrialFunctions(V)
+du, dU1, dC1, dU2, dC2, dU3, dC3, dU4, dC4, dU5, dC5, dU6, dC6, dU7, dC7, dU8, dC8  = TestFunctions(V)    
     
-class basic_2:
-    """
-    This class containing the grade 2 mathematical operations.
-
-
-    :param num1: First number
-    :type num1: float
-    :param num2: Second number
-    :type num2: float
-
-    .. code-block:: python
-
-        import maths as m
-        nums = m.basic_2(6,2)
-        div = nums.division()
-        mult = nums.multiply()
     
-    """
-    def __init__(self,num1,num2):
-        """
-        Class constructure
-
-        """
-        self.num1 = num1
-        self.num2 = num2
-    def multiply(self):
-        """
-        This function returns the multiplcation of two numbers.
-
-        :param num1: First number
-        :type num1: float
-        :param num2: Second number
-        :type num2: float
-
-        :returns: multiplication of num1 and num2
-        :rtype: float
-
-        """
-        return self.num1*self.num2
-    def division(self):
-        """
-        This function returns the division of two numbers.
-
-        :param num1: First number
-        :type num1: float
-        :param num2: Second number
-        :type num2: float
-
-        :returns: division of num1 off num2
-        :rtype: float
-        """
-        return self.num1/self.num2
-        
+mprint(V.dim())
